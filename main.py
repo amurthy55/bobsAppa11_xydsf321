@@ -1,0 +1,14 @@
+```json
+{
+  "files": [
+    {
+      "file_name": "main.py",
+      "content": "from fastapi import FastAPI, HTTPException\nfrom fastapi.responses import FileResponse\nimport requests\nimport pytesseract\nfrom PIL import Image\nfrom io import BytesIO\n\napp = FastAPI()\n\n@app.get(\"/solve-captcha\")\nasync def solve_captcha(url: str = \"data:image/png;base64,iVBORw.....\"):\n    try:\n        # Check if the URL is a valid image URL\n        if url.startswith(\"data:image/\"):\n            # Handle base64 image\n            image_data = url.split(\",\")[1]\n            image = Image.open(BytesIO(base64.b64decode(image_data)))\n        else:\n            # Fetch image from URL\n            response = requests.get(url)\n            response.raise_for_status()\n            image = Image.open(BytesIO(response.content))\n\n        # Use pytesseract to solve the captcha\n        captcha_text = pytesseract.image_to_string(image)\n        return {\"captcha_text\": captcha_text.strip()}\n    except Exception as e:\n        raise HTTPException(status_code=400, detail=str(e))\n\nif __name__ == \"__main__\":\n    import uvicorn\n    uvicorn.run(app, host=\"0.0.0.0\", port=8000)"
+    },
+    {
+      "file_name": "README.md",
+      "content": "# Captcha Solver Web App\n\n## Summary\nThis is a minimal web application built with FastAPI that solves captchas from provided image URLs or base64 encoded images.\n\n## Setup Instructions\n1. **Install Python**: Ensure you have Python 3.7 or higher installed.\n2. **Install Dependencies**: Run the following command to install the required packages:\n   ```bash\n   pip install fastapi uvicorn pytesseract pillow requests\n   ```\n3. **Install Tesseract**: Make sure you have Tesseract OCR installed on your system. You can find installation instructions [here](https://github.com/tesseract-ocr/tesseract).\n\n## Usage Instructions\n1. **Run the Application**:\n   ```bash\n   python main.py\n   ```\n   The server will start at `http://127.0.0.1:8000`.\n\n2. **Solve a Captcha**:\n   You can solve a captcha by sending a GET request to the `/solve-captcha` endpoint with the `url` parameter. For example:\n   ```bash\n   curl \"http://127.0.0.1:8000/solve-captcha?url=https://example.com/image.png\"\n   ```\n   You can also use a base64 encoded image:\n   ```bash\n   curl \"http://127.0.0.1:8000/solve-captcha?url=data:image/png;base64,iVBORw.....\"\n   ```\n\n## Code Explanation\n- The application uses FastAPI to create a web server.\n- The `/solve-captcha` endpoint accepts a URL parameter that can either be a direct image URL or a base64 encoded image.\n- It uses `requests` to fetch the image if a URL is provided.\n- The image is processed using `PIL` and `pytesseract` to extract text from the captcha image.\n- The extracted text is returned as a JSON response.\n\n## License\nThis project is licensed under the MIT License."
+    }
+  ]
+}
+```
